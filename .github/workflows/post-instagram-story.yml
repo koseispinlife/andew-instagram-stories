@@ -1,0 +1,40 @@
+name: Post Instagram Story
+
+on:
+  schedule:
+    # 22:00 UTC = 07:00 JST. The script waits 0-240 minutes.
+    - cron: "0 22 * * *"
+    # 09:00 UTC = 18:00 JST. The script waits 0-240 minutes.
+    - cron: "0 9 * * *"
+  workflow_dispatch:
+
+jobs:
+  post-story:
+    runs-on: ubuntu-latest
+    timeout-minutes: 260
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Publish story
+        env:
+          GRAPH_API_VERSION: v23.0
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          STORY_SCHEDULE_CSV: content/story_schedule.csv
+          STORY_START_DATE: "2026-07-15"
+          POSTS_PER_DAY: "2"
+          PUBLIC_ASSET_BASE_URL: ${{ vars.PUBLIC_ASSET_BASE_URL }}
+          RANDOM_DELAY_MAX_MINUTES: "240"
+          GITHUB_EVENT_SCHEDULE: ${{ github.event.schedule }}
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+        run: python scripts/post_story.py
