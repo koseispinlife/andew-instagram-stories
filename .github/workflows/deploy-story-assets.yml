@@ -39,6 +39,82 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Download product photos
+        run: |
+          mkdir -p assets/product_photos
+          curl -fsSL -o assets/product_photos/tablet.jpg "https://drive.google.com/uc?export=download&id=1MhMhXAoyyJEsB07wsdJq-l8qRrb4BcID"
+          curl -fsSL -o assets/product_photos/ingredients.jpg "https://drive.google.com/uc?export=download&id=1F5eUdm_0Y9blEWn8vM22eZ702n90VQYD"
+          curl -fsSL -o assets/product_photos/gift.jpg "https://drive.google.com/uc?export=download&id=11s7AqMv8i3sd7P-X5uHA-qccbFWzvGIQ"
+          curl -fsSL -o assets/product_photos/cocoa.jpg "https://drive.google.com/uc?export=download&id=1DZD_JmI9Kh5btWV1uOwEFBsXQ3nhnccw"
+          curl -fsSL -o assets/product_photos/flavors.jpg "https://drive.google.com/uc?export=download&id=1v_VaqeEld2uAWVCBDIziJJugMjwuQjDI"
+          curl -fsSL -o assets/product_photos/nama.jpg "https://drive.google.com/uc?export=download&id=1hZARg16JQnAwnzFH84WiJPJf6CFJ2ezE"
+          curl -fsSL -o assets/product_photos/family.jpg "https://drive.google.com/uc?export=download&id=1fdgVIYuvK11ypm2Etvbege6b7YEY7vrc"
+          curl -fsSL -o assets/product_photos/egift.jpg "https://drive.google.com/uc?export=download&id=1ISCGb2wA2c7oI096PRZZhMrSUvIT_3E9"
+          curl -fsSL -o assets/product_photos/donation.jpg "https://drive.google.com/uc?export=download&id=1ZtQGnMGqaDhEH_9ab4xlvEe_RO9QPy-6"
+
+      - name: Generate story assets
+        run: python scripts/generate_story_assets.py
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+name: Build and Deploy Story Assets
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "assets/**"
+      - "content/story_schedule.csv"
+      - "scripts/generate_story_assets.py"
+      - ".github/workflows/deploy-story-assets.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install system fonts
+        run: sudo apt-get update && sudo apt-get install -y fonts-noto-cjk
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
       - name: Generate story assets
         run: python scripts/generate_story_assets.py
 
