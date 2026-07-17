@@ -1,6 +1,7 @@
 import csv
 import math
 import os
+import re
 import textwrap
 from pathlib import Path
 
@@ -79,11 +80,33 @@ def draw_concept_background(canvas: Image.Image) -> None:
     draw.text((540, 1150), "世界一やさしいチョコレート", font=font(34, bold=False), fill=CONCEPT_INK, anchor="mm")
 
 
+def wrap_japanese(text: str, max_chars: int = 13) -> list[str]:
+    """句読点(、。！？)の直後を優先して、きりのいい位置で改行する。"""
+    segments = [s for s in re.split(r"(?<=[、。！？!?])", text) if s]
+    lines: list[str] = []
+    current = ""
+    for seg in segments:
+        while len(seg) > max_chars:
+            if current:
+                lines.append(current)
+                current = ""
+            lines.append(seg[:max_chars])
+            seg = seg[max_chars:]
+        if current and len(current) + len(seg) > max_chars:
+            lines.append(current)
+            current = seg
+        else:
+            current += seg
+    if current:
+        lines.append(current)
+    return lines
+
+
 def paste_sticker_copy(canvas: Image.Image, copy: str, top: int) -> None:
     copy = (copy or "").strip()
     if not copy:
         return
-    lines = textwrap.wrap(copy, width=13, break_long_words=True, replace_whitespace=False)
+    lines = wrap_japanese(copy, max_chars=13)
 
     text_font = font(58, bold=True)
     pad_x, pad_y, gap = 34, 20, 14
@@ -108,9 +131,8 @@ def paste_sticker_copy(canvas: Image.Image, copy: str, top: int) -> None:
         ldraw.text((x + pad_x, y + pad_y - oy), line, font=text_font, fill=STICKER_TEXT)
         y += h + gap
 
-    rotated = layer.rotate(2.2, expand=True, resample=Image.Resampling.BICUBIC)
-    paste_x = (CANVAS_SIZE[0] - rotated.width) // 2
-    canvas.paste(rotated, (paste_x, top), rotated)
+    paste_x = (CANVAS_SIZE[0] - layer.width) // 2
+    canvas.paste(layer, (paste_x, top), layer)
 
 
 def paste_mention_pill(canvas: Image.Image) -> None:
