@@ -1,15 +1,15 @@
 enabled,media_kind,title,asset_url,asset_path,source_image,theme,overlay_copy,cta_note
-true,image,andew concept 01,,stories/story-01.jpg,,concept,こういうやさしい甘さを作りたくて、続けています。,プロフィールリンクへ
+true,image,andew concept 01,,stories/story-01.jpg,,concept,やさしい甘さ、今日も作ってます！,プロフィールリンクへ
 true,image,andew tablet 01,,stories/story-02.jpg,assets/product_photos/tablet.jpg,product,まずはタブレット、かなりおすすめです！,商品ページへ
-true,image,andew origin 01,,stories/story-03.jpg,,concept,誰かに渡すものほど、静かに丁寧に作りたいです。,ストーリーを読む
-true,image,nutrition 01,,stories/story-04.jpg,,concept,栄養設計まで考えているところ、僕はすごく好きです。,栄養素を見る
-true,image,ingredients 01,,stories/story-05.jpg,assets/product_photos/ingredients.jpg,concept,素材をちゃんと選ぶところから、味は変わります。,原材料を見る
-true,image,gift 01,,stories/story-06.jpg,assets/product_photos/gift.jpg,product,お見舞いにも渡しやすいので、おすすめです！,ギフトを見る
-true,image,cocoa 01,,stories/story-07.jpg,assets/product_photos/cocoa.jpg,product,あたたかいandewココア、個人的にかなり好きです。,andewココアへ
-true,image,and you 01,,stories/story-08.jpg,,concept,andewは、and you。名前もけっこう気に入っています。,ブランドストーリーへ
-true,image,tablet flavors 01,,stories/story-09.jpg,assets/product_photos/flavors.jpg,product,味を選ぶ時間も楽しいので、ぜひ見てほしいです！,商品一覧へ
-true,image,nama chocolate 01,,stories/story-10.jpg,assets/product_photos/nama.jpg,product,このなめらかな口どけ、かなりおすすめです！,生チョコを見る
-true,image,for family 01,,stories/story-11.jpg,assets/product_photos/family.jpg,product,自分用にも家族用にも、ちょうどいい甘さです。,商品一覧へ
-true,image,voice 01,,stories/story-12.jpg,,social-proof,おいしいと言ってもらえるの、ほんとうに嬉しいです。,レビューを見る
-true,image,egift 01,,stories/story-13.jpg,assets/product_photos/egift.jpg,product,e-GIFT、気持ちを軽く送れておすすめです！,e-GIFTを見る
-true,image,donation 01,,stories/story-14.jpg,assets/product_photos/donation.jpg,donation,寄付付き商品は、EBの子どもたちの応援につながります。,寄付パッケージへ
+true,image,andew origin 01,,stories/story-03.jpg,,concept,誰かに渡すものほど、丁寧に！,ストーリーを読む
+true,image,nutrition 01,,stories/story-04.jpg,,concept,栄養設計まで、こだわってます！,栄養素を見る
+true,image,ingredients 01,,stories/story-05.jpg,assets/product_photos/ingredients.jpg,concept,素材選びから、こだわってます！,原材料を見る
+true,image,gift 01,,stories/story-06.jpg,assets/product_photos/gift.jpg,product,お見舞いにも渡しやすいです！,ギフトを見る
+true,image,cocoa 01,,stories/story-07.jpg,assets/product_photos/cocoa.jpg,product,あたたかいandewココア、かなり好きです！,andewココアへ
+true,image,and you 01,,stories/story-08.jpg,,concept,andewは、and you。いい名前です！,ブランドストーリーへ
+true,image,tablet flavors 01,,stories/story-09.jpg,assets/product_photos/flavors.jpg,product,味を選ぶ時間も、楽しんでほしい！,商品一覧へ
+true,image,nama chocolate 01,,stories/story-10.jpg,assets/product_photos/nama.jpg,product,このなめらかな口どけ、ぜひ一度！,生チョコを見る
+true,image,for family 01,,stories/story-11.jpg,assets/product_photos/family.jpg,product,自分にも家族にも、ちょうどいい甘さ！,商品一覧へ
+true,image,voice 01,,stories/story-12.jpg,,social-proof,「おいしい」の一言、ほんとうに嬉しいです！,レビューを見る
+true,image,egift 01,,stories/story-13.jpg,assets/product_photos/egift.jpg,product,e-GIFT、気持ちを軽く送れます！,e-GIFTを見る
+true,image,donation 01,,stories/story-14.jpg,assets/product_photos/donation.jpg,donation,寄付付き商品、EBの子どもたちの応援に！,寄付パッケージへ
