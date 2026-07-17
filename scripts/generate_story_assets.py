@@ -1,4 +1,5 @@
 import csv
+import math
 import os
 import textwrap
 from pathlib import Path
@@ -7,14 +8,14 @@ from PIL import Image, ImageDraw, ImageFont, ImageFilter
 
 
 CANVAS_SIZE = (1080, 1920)
-SAFE_MARGIN_X = 92
 OUTPUT_QUALITY = 92
-THEME_COLORS = {
-    "concept": ("#f6efe7", "#4a2a20"),
-    "product": ("#f3eadf", "#4a2a20"),
-    "social-proof": ("#f5eee8", "#4a2a20"),
-    "donation": ("#f7efe9", "#4a2a20"),
-}
+
+STICKER_ORANGE = (250, 126, 30)
+STICKER_TEXT = (255, 255, 255)
+MENTION_BG = (255, 255, 255, 235)
+MENTION_TEXT = (60, 42, 32)
+CONCEPT_BG = "#f6efe7"
+CONCEPT_INK = "#4a2a20"
 
 
 def main() -> None:
@@ -35,26 +36,25 @@ def main() -> None:
 
 
 def render_story(root: Path, row: dict[str, str]) -> Image.Image:
-    background, ink = THEME_COLORS.get(row.get("theme", "concept"), THEME_COLORS["concept"])
-    canvas = Image.new("RGB", CANVAS_SIZE, background)
-    draw = ImageDraw.Draw(canvas)
+    canvas = Image.new("RGB", CANVAS_SIZE, CONCEPT_BG)
 
     source_path = row.get("source_image", "").strip()
-    if source_path and (root / source_path).exists():
+    has_photo = bool(source_path) and (root / source_path).exists()
+    if has_photo:
         place_photo(canvas, root / source_path)
     else:
-        draw_photo_placeholder(draw, ink)
+        draw_concept_background(canvas)
 
-    draw_copy(draw, row.get("overlay_copy", ""), ink)
+    paste_sticker_copy(canvas, row.get("overlay_copy", ""), top=210 if has_photo else 640)
+    paste_mention_pill(canvas)
     return canvas
 
 
-def font(size: int, bold: bool = False) -> ImageFont.FreeTypeFont:
+def font(size: int, bold: bool = True) -> ImageFont.FreeTypeFont:
     candidates = [
-        "/System/Library/Fonts/ヒラギノ角ゴシック W6.ttc" if bold else "/System/Library/Fonts/ヒラギノ角ゴシック W3.ttc",
-        "/System/Library/Fonts/ヒラギノ丸ゴ ProN W4.ttc",
         "/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc" if bold else "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
         "/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc",
+        "/System/Library/Fonts/ヒラギノ角ゴシック W6.ttc" if bold else "/System/Library/Fonts/ヒラギノ角ゴシック W3.ttc",
         "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
     ]
     for candidate in candidates:
@@ -73,25 +73,58 @@ def place_photo(canvas: Image.Image, photo_path: Path) -> None:
     canvas.paste(cropped.filter(ImageFilter.SHARPEN), (0, 0))
 
 
-def draw_photo_placeholder(draw: ImageDraw.ImageDraw, ink: str) -> None:
-    draw.rectangle((0, 0, CANVAS_SIZE[0], CANVAS_SIZE[1]), fill="#f3eadf")
-    draw.text((540, 860), "andew", font=font(72, bold=True), fill=ink, anchor="mm")
-    draw.text((540, 936), "商品写真を配置してください", font=font(34), fill=ink, anchor="mm")
-    draw.text((540, 994), "assets/product_photos", font=font(28), fill=ink, anchor="mm")
+def draw_concept_background(canvas: Image.Image) -> None:
+    draw = ImageDraw.Draw(canvas)
+    draw.text((540, 1050), "andew", font=font(96, bold=True), fill=CONCEPT_INK, anchor="mm")
+    draw.text((540, 1150), "世界一やさしいチョコレート", font=font(34, bold=False), fill=CONCEPT_INK, anchor="mm")
 
 
-def draw_copy(draw: ImageDraw.ImageDraw, copy: str, ink: str) -> None:
+def paste_sticker_copy(canvas: Image.Image, copy: str, top: int) -> None:
+    copy = (copy or "").strip()
     if not copy:
         return
-    wrapped = textwrap.wrap(copy, width=20, break_long_words=True, replace_whitespace=False)
-    box_top = 1360
-    box_bottom = 1666
-    line_height = 68
-    draw.rounded_rectangle((64, box_top, 1016, box_bottom), radius=36, fill=(255, 250, 245))
-    y = box_top + 52
-    for line in wrapped:
-        draw.text((SAFE_MARGIN_X, y), line, font=font(46, bold=True), fill=ink)
-        y += line_height
+    lines = textwrap.wrap(copy, width=13, break_long_words=True, replace_whitespace=False)
+
+    text_font = font(58, bold=True)
+    pad_x, pad_y, gap = 34, 20, 14
+    probe = ImageDraw.Draw(Image.new("RGB", (10, 10)))
+
+    pills = []
+    for line in lines:
+        bbox = probe.textbbox((0, 0), line, font=text_font)
+        w = bbox[2] - bbox[0] + pad_x * 2
+        h = bbox[3] - bbox[1] + pad_y * 2
+        pills.append((line, w, h, bbox[1]))
+
+    block_w = max(p[1] for p in pills) + 40
+    block_h = sum(p[2] for p in pills) + gap * (len(pills) - 1) + 40
+    layer = Image.new("RGBA", (block_w, block_h), (0, 0, 0, 0))
+    ldraw = ImageDraw.Draw(layer)
+
+    y = 20
+    for line, w, h, oy in pills:
+        x = (block_w - w) // 2
+        ldraw.rounded_rectangle((x, y, x + w, y + h), radius=16, fill=STICKER_ORANGE + (255,))
+        ldraw.text((x + pad_x, y + pad_y - oy), line, font=text_font, fill=STICKER_TEXT)
+        y += h + gap
+
+    rotated = layer.rotate(2.2, expand=True, resample=Image.Resampling.BICUBIC)
+    paste_x = (CANVAS_SIZE[0] - rotated.width) // 2
+    canvas.paste(rotated, (paste_x, top), rotated)
+
+
+def paste_mention_pill(canvas: Image.Image) -> None:
+    text = "@andew_chocolate"
+    text_font = font(38, bold=True)
+    probe = ImageDraw.Draw(Image.new("RGB", (10, 10)))
+    bbox = probe.textbbox((0, 0), text, font=text_font)
+    w = bbox[2] - bbox[0] + 56
+    h = bbox[3] - bbox[1] + 34
+    layer = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    ldraw = ImageDraw.Draw(layer)
+    ldraw.rounded_rectangle((0, 0, w, h), radius=h // 2, fill=MENTION_BG)
+    ldraw.text((28, 17 - bbox[1]), text, font=text_font, fill=MENTION_TEXT)
+    canvas.paste(layer, ((CANVAS_SIZE[0] - w) // 2, 1770), layer)
 
 
 if __name__ == "__main__":
