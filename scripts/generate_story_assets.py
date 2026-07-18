@@ -43,11 +43,10 @@ def render_story(root: Path, row: dict[str, str]) -> Image.Image:
     has_photo = bool(source_path) and (root / source_path).exists()
     if has_photo:
         place_photo(canvas, root / source_path)
-    else:
-        draw_concept_background(canvas)
 
-    paste_sticker_copy(canvas, row.get("overlay_copy", ""), top=210 if has_photo else 640)
-    paste_mention_pill(canvas)
+    paste_sticker_copy(canvas, row.get("overlay_copy", ""), top=210)
+    variant = sum(ord(c) for c in (row.get("title") or row.get("asset_path") or ""))
+    paste_mention_pill(canvas, variant)
     return canvas
 
 
@@ -73,11 +72,6 @@ def place_photo(canvas: Image.Image, photo_path: Path) -> None:
     cropped = resized.crop((left, top, left + CANVAS_SIZE[0], top + CANVAS_SIZE[1]))
     canvas.paste(cropped.filter(ImageFilter.SHARPEN), (0, 0))
 
-
-def draw_concept_background(canvas: Image.Image) -> None:
-    draw = ImageDraw.Draw(canvas)
-    draw.text((540, 1050), "andew", font=font(96, bold=True), fill=CONCEPT_INK, anchor="mm")
-    draw.text((540, 1150), "世界一やさしいチョコレート", font=font(34, bold=False), fill=CONCEPT_INK, anchor="mm")
 
 
 def wrap_japanese(text: str, max_chars: int = 13) -> list[str]:
@@ -135,18 +129,52 @@ def paste_sticker_copy(canvas: Image.Image, copy: str, top: int) -> None:
     canvas.paste(layer, (paste_x, top), layer)
 
 
-def paste_mention_pill(canvas: Image.Image) -> None:
+def gradient_pill(w: int, h: int) -> Image.Image:
+    """Instagram風の虹色グラデーションピル。"""
+    stops = [(122, 95, 255), (233, 62, 143), (255, 176, 58)]
+    grad = Image.new("RGBA", (w, h))
+    for x in range(w):
+        t = x / max(w - 1, 1)
+        if t < 0.5:
+            a, b, tt = stops[0], stops[1], t * 2
+        else:
+            a, b, tt = stops[1], stops[2], (t - 0.5) * 2
+        color = tuple(int(a[i] + (b[i] - a[i]) * tt) for i in range(3)) + (255,)
+        for y in range(h):
+            grad.putpixel((x, y), color)
+    mask = Image.new("L", (w, h), 0)
+    ImageDraw.Draw(mask).rounded_rectangle((0, 0, w, h), radius=h // 2, fill=255)
+    pill = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    pill.paste(grad, (0, 0), mask)
+    return pill
+
+
+def paste_mention_pill(canvas: Image.Image, variant: int = 0) -> None:
     text = "@andew_chocolate"
     text_font = font(38, bold=True)
     probe = ImageDraw.Draw(Image.new("RGB", (10, 10)))
     bbox = probe.textbbox((0, 0), text, font=text_font)
     w = bbox[2] - bbox[0] + 56
     h = bbox[3] - bbox[1] + 34
-    layer = Image.new("RGBA", (w, h), (0, 0, 0, 0))
-    ldraw = ImageDraw.Draw(layer)
-    ldraw.rounded_rectangle((0, 0, w, h), radius=h // 2, fill=MENTION_BG)
-    ldraw.text((28, 17 - bbox[1]), text, font=text_font, fill=MENTION_TEXT)
-    canvas.paste(layer, ((CANVAS_SIZE[0] - w) // 2, 1770), layer)
+
+    use_rainbow = variant % 2 == 1
+    if use_rainbow:
+        layer = gradient_pill(w, h)
+        text_color = (255, 255, 255)
+    else:
+        layer = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+        ImageDraw.Draw(layer).rounded_rectangle((0, 0, w, h), radius=h // 2, fill=MENTION_BG)
+        text_color = MENTION_TEXT
+    ImageDraw.Draw(layer).text((28, 17 - bbox[1]), text, font=text_font, fill=text_color)
+
+    positions = [
+        ((CANVAS_SIZE[0] - w) // 2, 1770),
+        (72, 1740),
+        (CANVAS_SIZE[0] - w - 72, 1740),
+        ((CANVAS_SIZE[0] - w) // 2, 1640),
+    ]
+    pos = positions[variant % len(positions)]
+    canvas.paste(layer, pos, layer)
 
 
 if __name__ == "__main__":
