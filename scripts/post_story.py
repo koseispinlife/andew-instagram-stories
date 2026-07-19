@@ -22,16 +22,29 @@ def require_env(name: str) -> str:
 
 
 def graph_post(path: str, data: dict[str, Any]) -> dict[str, Any]:
-    response = requests.post(f"{GRAPH_API_BASE}/{path}", data=data, timeout=60)
-    try:
-        payload = response.json()
-    except ValueError as exc:
-        raise RuntimeError(f"Graph API returned non-JSON response: {response.text}") from exc
+    max_attempts = int(os.getenv("GRAPH_RETRY_ATTEMPTS", "4"))
+    last_error = "unknown error"
+    for attempt in range(1, max_attempts + 1):
+        response = requests.post(f"{GRAPH_API_BASE}/{path}", data=data, timeout=60)
+        try:
+            payload = response.json()
+        except ValueError as exc:
+            raise RuntimeError(f"Graph API returned non-JSON response: {response.text}") from exc
 
-    if not response.ok:
-        raise RuntimeError(f"Graph API error {response.status_code}: {payload}")
+        if response.ok:
+            return payload
 
-    return payload
+        error_info = payload.get("error", {}) if isinstance(payload, dict) else {}
+        transient = bool(error_info.get("is_transient")) or response.status_code >= 500
+        last_error = f"Graph API error {response.status_code}: {payload}"
+        if transient and attempt < max_attempts:
+            wait = 30 * (2 ** (attempt - 1))
+            print(f"Transient Graph API error (attempt {attempt}/{max_attempts}). Retrying in {wait}s...")
+            time.sleep(wait)
+            continue
+        raise RuntimeError(last_error)
+
+    raise RuntimeError(last_error)
 
 
 def build_story_url(row: dict[str, str]) -> str:
@@ -165,5 +178,5 @@ if __name__ == "__main__":
     try:
         main()
     except Exception as exc:
-        print(f"Error: {exc}", file=sys.stderr)
+        print(f"Error: {exc}", file=sys.exit(1) if False else sys.stderr)
         sys.exit(1)
