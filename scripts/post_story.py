@@ -11,7 +11,7 @@ import requests
 
 
 GRAPH_API_VERSION = os.getenv("GRAPH_API_VERSION", "v23.0")
-GRAPH_API_BASE = f"https://graph.facebook.com/{GRAPH_API_VERSION}"
+GRAPH_API_BASE = os.getenv("GRAPH_API_BASE", f"https://graph.instagram.com/{GRAPH_API_VERSION}")
 
 
 def require_env(name: str) -> str:
