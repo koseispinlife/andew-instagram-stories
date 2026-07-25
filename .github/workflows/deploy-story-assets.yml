@@ -51,6 +51,11 @@ jobs:
           curl -fsSL -o assets/product_photos/family.jpg "https://drive.google.com/uc?export=download&id=1fdgVIYuvK11ypm2Etvbege6b7YEY7vrc"
           curl -fsSL -o assets/product_photos/egift.jpg "https://drive.google.com/uc?export=download&id=1ISCGb2wA2c7oI096PRZZhMrSUvIT_3E9"
           curl -fsSL -o assets/product_photos/donation.jpg "https://drive.google.com/uc?export=download&id=1ZtQGnMGqaDhEH_9ab4xlvEe_RO9QPy-6"
+          curl -fsSL -o assets/product_photos/praline.jpg "https://drive.google.com/uc?export=download&id=19vipkkyqgINkMnPIjxyXNQ926AW9t8QW"
+          curl -fsSL -o assets/product_photos/fruit.jpg "https://drive.google.com/uc?export=download&id=1OZNHavlTrJgRyL58E1zYM7zW_-9BDvYT"
+          curl -fsSL -o assets/product_photos/matcha.jpg "https://drive.google.com/uc?export=download&id=1JAWGV0jkKEZpCM20HurY0ISOmWkupnq0"
+          curl -fsSL -o assets/product_photos/icecocoa.jpg "https://drive.google.com/uc?export=download&id=1TsgT9bBkU9mnjLHuri017WDZ6W_68dYJ"
+          curl -fsSL -o assets/product_photos/night.jpg "https://drive.google.com/uc?export=download&id=1Fi2JEt22YA3vd2J2k5N7A9p_IT-4eRjs"
 
       - name: Generate story assets
         run: python scripts/generate_story_assets.py
