@@ -8,7 +8,10 @@ on:
       - "assets/**"
       - "content/story_schedule.csv"
       - "scripts/generate_story_assets.py"
+      - "scripts/fetch_photos.py"
       - ".github/workflows/deploy-story-assets.yml"
+  schedule:
+    - cron: "0 20 * * *"
   workflow_dispatch:
 
 permissions:
@@ -40,22 +43,7 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Download product photos
-        run: |
-          mkdir -p assets/product_photos
-          curl -fsSL -o assets/product_photos/tablet.jpg "https://drive.google.com/uc?export=download&id=1MhMhXAoyyJEsB07wsdJq-l8qRrb4BcID"
-          curl -fsSL -o assets/product_photos/ingredients.jpg "https://drive.google.com/uc?export=download&id=1F5eUdm_0Y9blEWn8vM22eZ702n90VQYD"
-          curl -fsSL -o assets/product_photos/gift.jpg "https://drive.google.com/uc?export=download&id=11s7AqMv8i3sd7P-X5uHA-qccbFWzvGIQ"
-          curl -fsSL -o assets/product_photos/cocoa.jpg "https://drive.google.com/uc?export=download&id=1DZD_JmI9Kh5btWV1uOwEFBsXQ3nhnccw"
-          curl -fsSL -o assets/product_photos/flavors.jpg "https://drive.google.com/uc?export=download&id=1v_VaqeEld2uAWVCBDIziJJugMjwuQjDI"
-          curl -fsSL -o assets/product_photos/nama.jpg "https://drive.google.com/uc?export=download&id=1hZARg16JQnAwnzFH84WiJPJf6CFJ2ezE"
-          curl -fsSL -o assets/product_photos/family.jpg "https://drive.google.com/uc?export=download&id=1fdgVIYuvK11ypm2Etvbege6b7YEY7vrc"
-          curl -fsSL -o assets/product_photos/egift.jpg "https://drive.google.com/uc?export=download&id=1ISCGb2wA2c7oI096PRZZhMrSUvIT_3E9"
-          curl -fsSL -o assets/product_photos/donation.jpg "https://drive.google.com/uc?export=download&id=1ZtQGnMGqaDhEH_9ab4xlvEe_RO9QPy-6"
-          curl -fsSL -o assets/product_photos/praline.jpg "https://drive.google.com/uc?export=download&id=19vipkkyqgINkMnPIjxyXNQ926AW9t8QW"
-          curl -fsSL -o assets/product_photos/fruit.jpg "https://drive.google.com/uc?export=download&id=1OZNHavlTrJgRyL58E1zYM7zW_-9BDvYT"
-          curl -fsSL -o assets/product_photos/matcha.jpg "https://drive.google.com/uc?export=download&id=1JAWGV0jkKEZpCM20HurY0ISOmWkupnq0"
-          curl -fsSL -o assets/product_photos/icecocoa.jpg "https://drive.google.com/uc?export=download&id=1TsgT9bBkU9mnjLHuri017WDZ6W_68dYJ"
-          curl -fsSL -o assets/product_photos/night.jpg "https://drive.google.com/uc?export=download&id=1Fi2JEt22YA3vd2J2k5N7A9p_IT-4eRjs"
+        run: python scripts/fetch_photos.py
 
       - name: Generate story assets
         run: python scripts/generate_story_assets.py
