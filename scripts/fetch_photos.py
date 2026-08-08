@@ -20,6 +20,7 @@ OUTPUT_DIR = Path("assets/product_photos")
 CATEGORIES = [
     "tablet", "ingredients", "gift", "cocoa", "flavors", "nama", "family",
     "egift", "donation", "praline", "fruit", "matcha", "icecocoa", "night",
+    "concept", "variety", "nutrition", "wrapping", "voice", "andyou",
 ]
 
 ENTRY_RE = re.compile(
