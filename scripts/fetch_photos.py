@@ -18,7 +18,7 @@ ROOT_FOLDER_ID = os.getenv("PHOTO_FOLDER_ID", "1_5yQ9fz4b7cHJ8vqPv41ExTTsi8J1ZX3
 OUTPUT_DIR = Path("assets/product_photos")
 
 CATEGORIES = [
-    "tablet", "ingredients", "gift", "cocoa", "flavors", "nama", "family",
+    "tablet", "materials", "gift", "cocoa", "flavors", "nama", "family",
     "egift", "donation", "praline", "fruit", "matcha", "icecocoa", "night",
     "concept", "variety", "nutrition", "wrapping", "voice", "andyou",
 ]
