@@ -1,0 +1,77 @@
+name: Sync Config from Drive
+
+on:
+  schedule:
+    - cron: "30 19 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_PAT }}
+
+      - name: Download config files from Drive
+        run: |
+          python3 << 'EOF'
+          import re
+          import sys
+          import urllib.request
+          from pathlib import Path
+
+          CONFIG_FOLDER_ID = "1Xyw0T2k_3pgMxWhySP_eUrzDBFiJ7x54"
+          WHITELIST = {
+              "story_schedule.csv": "content/story_schedule.csv",
+              "reviews.csv": "content/reviews.csv",
+              "fetch_photos.py.txt": "scripts/fetch_photos.py",
+              "generate_story_assets.py.txt": "scripts/generate_story_assets.py",
+          }
+          ENTRY_RE = re.compile(
+              r'href="https://drive\.google\.com/file/d/([\w-]+)[^"]*"[^>]*>.*?'
+              r'<div class="flip-entry-title">([^<]+)</div>',
+              re.DOTALL,
+          )
+
+          def fetch(url):
+              req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+              with urllib.request.urlopen(req, timeout=60) as r:
+                  return r.read()
+
+          html = fetch(f"https://drive.google.com/embeddedfolderview?id={CONFIG_FOLDER_ID}").decode("utf-8", "replace")
+          files = {name.strip(): fid for fid, name in ENTRY_RE.findall(html)}
+
+          for drive_name, repo_path in WHITELIST.items():
+              if drive_name not in files:
+                  print(f"skip (not in Drive): {drive_name}")
+                  continue
+              data = fetch(f"https://drive.google.com/uc?export=download&id={files[drive_name]}")
+              text = data.decode("utf-8")
+              if text.lstrip().startswith("<"):
+                  sys.exit(f"HTML response for {drive_name}; aborting")
+              if repo_path.endswith(".py"):
+                  compile(text, repo_path, "exec")
+              if repo_path.endswith("story_schedule.csv") and not text.startswith("enabled,"):
+                  sys.exit(f"unexpected header in {drive_name}; aborting")
+              if repo_path.endswith("reviews.csv") and not text.startswith("quote,"):
+                  sys.exit(f"unexpected header in {drive_name}; aborting")
+              Path(repo_path).write_text(text, encoding="utf-8")
+              print(f"synced: {drive_name} -> {repo_path} ({len(data)}B)")
+          EOF
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name "drive-sync"
+          git config user.email "actions@users.noreply.github.com"
+          git add content/story_schedule.csv content/reviews.csv scripts/fetch_photos.py scripts/generate_story_assets.py
+          if git diff --cached --quiet; then
+            echo "No changes."
+          else
+            git commit -m "Sync config from Drive"
+            git push
+          fi
