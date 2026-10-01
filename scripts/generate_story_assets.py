@@ -40,11 +40,26 @@ def render_story(root: Path, row: dict[str, str]) -> Image.Image:
     canvas = Image.new("RGB", CANVAS_SIZE, CONCEPT_BG)
 
     source_path = row.get("source_image", "").strip()
+    review = None
+    if row.get("theme") == "review":
+        review = pick_review()
+        bg = review.get("bg", "").strip()
+        if bg:
+            source_path = f"assets/product_photos/{bg}.jpg"
     has_photo = bool(source_path) and (root / source_path).exists()
     if has_photo:
         place_photo(canvas, root / source_path)
 
-    paste_sticker_copy(canvas, row.get("overlay_copy", ""), top=210)
+    sticker_text = row.get("overlay_copy", "")
+    if review is not None and review.get("sticker"):
+        sticker_text = review["sticker"]
+    from datetime import date as _d
+    seed = sum(ord(c) for c in (row.get("title") or "")) * 7 + _d.today().toordinal()
+    layouts = [(210, 0), (240, 1), (240, 2), (430, 0), (1330, 0)]
+    top_pos, x_mode = layouts[seed % (3 if review is not None else len(layouts))]
+    paste_sticker_copy(canvas, sticker_text, top=top_pos, x_mode=x_mode)
+    if review is not None:
+        paste_review_card(canvas, review)
     variant = sum(ord(c) for c in (row.get("title") or row.get("asset_path") or ""))
     paste_mention_pill(canvas, variant)
     return canvas
@@ -96,7 +111,7 @@ def wrap_japanese(text: str, max_chars: int = 13) -> list[str]:
     return lines
 
 
-def paste_sticker_copy(canvas: Image.Image, copy: str, top: int) -> None:
+def paste_sticker_copy(canvas: Image.Image, copy: str, top: int, x_mode: int = 0) -> None:
     copy = (copy or "").strip()
     if not copy:
         return
@@ -125,7 +140,12 @@ def paste_sticker_copy(canvas: Image.Image, copy: str, top: int) -> None:
         ldraw.text((x + pad_x, y + pad_y - oy), line, font=text_font, fill=STICKER_TEXT)
         y += h + gap
 
-    paste_x = (CANVAS_SIZE[0] - layer.width) // 2
+    if x_mode == 1:
+        paste_x = 48
+    elif x_mode == 2:
+        paste_x = CANVAS_SIZE[0] - layer.width - 48
+    else:
+        paste_x = (CANVAS_SIZE[0] - layer.width) // 2
     canvas.paste(layer, (paste_x, top), layer)
 
 
@@ -147,6 +167,74 @@ def gradient_pill(w: int, h: int) -> Image.Image:
     pill = Image.new("RGBA", (w, h), (0, 0, 0, 0))
     pill.paste(grad, (0, 0), mask)
     return pill
+
+
+
+def wrap_card(text: str, max_chars: int = 14) -> list[str]:
+    lines = []
+    current = ""
+    for ch in text:
+        current += ch
+        if len(current) >= max_chars or ch in "、。！？":
+            lines.append(current)
+            current = ""
+    if current:
+        lines.append(current)
+    return [l for l in lines if l][:7]
+
+
+def pick_review() -> dict[str, str]:
+    import csv as _csv
+    from datetime import date as _date
+    reviews = list(_csv.DictReader(open("content/reviews.csv", encoding="utf-8")))
+    return reviews[_date.today().toordinal() % len(reviews)]
+
+
+def paste_review_card(canvas: Image.Image, review: dict[str, str]) -> None:
+    orange = STICKER_ORANGE
+    card_w = 880
+    x0 = (CANVAS_SIZE[0] - card_w) // 2
+    q_lines = wrap_card(review["quote"])
+    r_lines = wrap_card(review.get("reply", ""), max_chars=16)
+    line_h, reply_h = 58, 44
+    card_h = 240 + line_h * len(q_lines) + 66 + (56 + reply_h * len(r_lines) if r_lines else 0) + 40
+    y0 = (CANVAS_SIZE[1] - card_h) // 2 + 70
+    overlay = Image.new("RGBA", canvas.size, (0, 0, 0, 0))
+    ImageDraw.Draw(overlay).rounded_rectangle(
+        (x0, y0, x0 + card_w, y0 + card_h), radius=36, fill=(255, 255, 255, 242))
+    canvas.paste(overlay, (0, 0), overlay)
+    d2 = ImageDraw.Draw(canvas)
+    label_font = font(28)
+    lw = d2.textbbox((0, 0), "お客さまの声", font=label_font)[2]
+    pill_w, pill_h = lw + 48, 52
+    px = x0 + (card_w - pill_w) // 2
+    py = y0 + 36
+    d2.rounded_rectangle((px, py, px + pill_w, py + pill_h), radius=26, fill=orange)
+    d2.text((px + 24, py + 8), "お客さまの声", font=label_font, fill=(255, 255, 255))
+    star_font = font(44)
+    sw = d2.textbbox((0, 0), "★★★★★", font=star_font)[2]
+    d2.text((x0 + (card_w - sw) // 2, py + 72), "★★★★★", font=star_font, fill=orange)
+    quote_font = font(38)
+    ty = py + 152
+    for line in q_lines:
+        tw = d2.textbbox((0, 0), line, font=quote_font)[2]
+        d2.text((x0 + (card_w - tw) // 2, ty), line, font=quote_font, fill=(60, 50, 45))
+        ty += line_h
+    rev_font = font(30)
+    rev = "— " + review["reviewer"]
+    rw = d2.textbbox((0, 0), rev, font=rev_font)[2]
+    d2.text((x0 + card_w - rw - 48, ty + 6), rev, font=rev_font, fill=(140, 130, 125))
+    ty += 66
+    if r_lines:
+        d2.line((x0 + 60, ty, x0 + card_w - 60, ty), fill=(232, 226, 220), width=3)
+        ty += 18
+        tag_font = font(26)
+        d2.text((x0 + 60, ty), "andew 中村より", font=tag_font, fill=orange)
+        ty += 40
+        reply_font = font(30)
+        for line in r_lines:
+            d2.text((x0 + 60, ty), line, font=reply_font, fill=(90, 80, 75))
+            ty += reply_h
 
 
 def paste_mention_pill(canvas: Image.Image, variant: int = 0) -> None:

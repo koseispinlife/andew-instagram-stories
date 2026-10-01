@@ -5,17 +5,18 @@ true,image,andew origin 01,,stories/story-03.jpg,assets/product_photos/wrapping.
 true,image,nutrition 01,,stories/story-04.jpg,assets/product_photos/nutrition.jpg,concept,栄養設計まで、こだわってます！,栄養素を見る
 true,image,ingredients 01,,stories/story-05.jpg,assets/product_photos/materials.jpg,concept,素材選びから、こだわってます！,原材料を見る
 true,image,gift 01,,stories/story-06.jpg,assets/product_photos/gift.jpg,product,お見舞いにも渡しやすいです！,ギフトを見る
-false,image,cocoa 01,,stories/story-07.jpg,assets/product_photos/cocoa.jpg,product,あたたかいandewココア、かなり好きです！,andewココアへ
+true,image,cocoa 01,,stories/story-07.jpg,assets/product_photos/cocoa.jpg,product,あたたかいandewココア、かなり好きです！,andewココアへ
 true,image,and you 01,,stories/story-08.jpg,assets/product_photos/andyou.jpg,concept,andewは、and you。いい名前です！,ブランドストーリーへ
-true,image,tablet flavors 01,,stories/story-09.jpg,assets/product_photos/flavors.jpg,product,味を選ぶ時間も、楽しんでほしい！,商品一覧へ
-true,image,nama chocolate 01,,stories/story-10.jpg,assets/product_photos/nama.jpg,product,このなめらかな口どけ、ぜひ一度！,生チョコを見る
-true,image,for family 01,,stories/story-11.jpg,assets/product_photos/family.jpg,product,自分にも家族にも、ちょうどいい甘さ！,商品一覧へ
+true,image,tablet flavors 01,,stories/story-09.jpg,assets/product_photos/flavors.jpg,product,味を選ぶ時間も、じつは楽しいんです,商品一覧へ
+true,image,nama chocolate 01,,stories/story-10.jpg,assets/product_photos/nama.jpg,product,この生チョコ、自信作です,生チョコを見る
+true,image,for family 01,,stories/story-11.jpg,assets/product_photos/family.jpg,product,お客さまの素敵な一枚、ありがとうございます！,商品一覧へ
 true,image,voice 01,,stories/story-12.jpg,assets/product_photos/voice.jpg,social-proof,「おいしい」の一言、ほんとうに嬉しいです！,レビューを見る
 false,image,egift 01,,stories/story-13.jpg,assets/product_photos/egift.jpg,product,e-GIFT、気持ちを軽く送れます！,e-GIFTを見る
 true,image,donation 01,,stories/story-14.jpg,assets/product_photos/donation.jpg,donation,寄付付き商品、EBの子どもたちの応援に！,寄付パッケージへ
-true,image,praline 01,,stories/story-15.jpg,assets/product_photos/praline.jpg,product,プラリネ、香ばしくて好きです！,商品ページへ
+false,image,praline 01,,stories/story-15.jpg,assets/product_photos/praline.jpg,product,プラリネ、香ばしくて好きです！,商品ページへ
 true,image,fruit tablet 01,,stories/story-16.jpg,assets/product_photos/fruit.jpg,product,ドライフルーツ、ごろっと入ってます！,商品ページへ
-true,image,matcha 01,,stories/story-17.jpg,assets/product_photos/matcha.jpg,product,抹茶好きの方には、ぜひ！,商品一覧へ
-true,image,ice cocoa 01,,stories/story-18.jpg,assets/product_photos/icecocoa.jpg,product,夏はアイスココアもおすすめです！,andewココアへ
+true,image,matcha 01,,stories/story-17.jpg,assets/product_photos/matcha.jpg,product,抹茶は、しっかり本格的に作ってます,商品一覧へ
+false,image,ice cocoa 01,,stories/story-18.jpg,assets/product_photos/icecocoa.jpg,product,夏はアイスココアもおすすめです！,andewココアへ
 true,image,night chocolat 01,,stories/story-19.jpg,assets/product_photos/night.jpg,product,夜にちょっとクセになるチョコです！,ナイトショコラへ
 true,image,strawberry 01,,stories/story-20.jpg,assets/product_photos/strawberry.jpg,product,いちごチョコ、甘酸っぱくて人気です！,商品ページへ
+true,image,customer review 01,,stories/story-21.jpg,assets/product_photos/gift.jpg,review,嬉しいレビュー、ありがとうございます！,レビューを見る
